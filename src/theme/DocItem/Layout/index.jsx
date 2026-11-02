@@ -17,6 +17,7 @@ import DocItemTOCDesktop from '@theme/DocItem/TOC/Desktop';
 import DocItemContent from '@theme/DocItem/Content';
 import DocBreadcrumbs from '@theme/DocBreadcrumbs';
 import ContentVisibility from '@theme/ContentVisibility';
+import ReadingProgress from '@theme/ReadingProgress';
 import styles from './styles.module.css';
 
 /**
@@ -61,6 +62,7 @@ export default function DocItemLayout({children}) {
         </div>
       </div>
       {docTOC.desktop && <div className="col col--3">{docTOC.desktop}</div>}
+      <ReadingProgress />
     </div>
   );
 }

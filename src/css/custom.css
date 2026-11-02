@@ -44,13 +44,13 @@ html {
 
 /* 经文：灰色底 + 左侧灰竖线，节号与经文同行（不分行） */
 .bible-text {
-  padding: 0.75rem 1rem;
-  margin: 0.75rem 0;
-  background: #f4f4f5;
+  padding: 1rem 1.15rem;
+  margin: 1rem 0 1.5rem;
+  background: #f7f7f8;
   border: none;
   border-left: 3px solid #a1a1aa;
-  border-radius: 0 4px 4px 0;
-  line-height: 1.75;
+  border-radius: 0 5px 5px 0;
+  line-height: 1.9;
   color: #18181b;
 }
 
@@ -244,6 +244,59 @@ mark.keyword-highlight {
   border-radius: 2px;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
+}
+
+/* 文档标题：细分隔线，与元信息、正文区分开 */
+.theme-doc-markdown h1 {
+  font-size: 1.85rem;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.015em;
+  margin: 0 0 0.6rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #e4e4e7;
+}
+
+/* 小节标题：更舒展的层级，避免与正文挤在一起 */
+.theme-doc-markdown h2 {
+  font-size: 1.28rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #27272a;
+  margin-top: 2.25rem;
+  margin-bottom: 0.75rem;
+}
+
+/* 文档标题下方的上传/更新日期元信息行 */
+.doc-dates {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 1.25rem;
+  margin: 0.5rem 0 1.5rem;
+  font-size: 0.8rem;
+}
+
+.doc-dates__item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+
+.doc-dates__label {
+  color: #a1a1aa;
+  letter-spacing: 0.03em;
+}
+
+.doc-dates__value {
+  color: #52525b;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 目录当前阅读章节：加深颜色，与未激活项区分 */
+.table-of-contents__link--active {
+  color: #18181b;
+  font-weight: 600;
 }
 
 /*

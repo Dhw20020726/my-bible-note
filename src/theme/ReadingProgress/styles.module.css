@@ -1,0 +1,41 @@
+.readingProgress {
+  position: fixed;
+  right: 1.3rem;
+  bottom: 5.3rem;
+  width: 56px;
+  height: 56px;
+  z-index: calc(var(--ifm-z-index-fixed) - 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.readingProgress svg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+
+.track,
+.progress {
+  fill: none;
+  stroke-width: 5;
+}
+
+.track {
+  stroke: rgba(0, 0, 0, 0.1);
+}
+
+.progress {
+  stroke: #16a34a;
+  stroke-linecap: round;
+}
+
+.label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #166534;
+  line-height: 1;
+  z-index: 1;
+}

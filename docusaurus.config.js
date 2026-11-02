@@ -59,6 +59,8 @@ const config = {
           remarkPlugins: [
             require('./plugins/auto-bible'),
             require('./plugins/bible-embed'),
+            require('./plugins/passage-intro'),
+            require('./plugins/doc-meta'),
           ],
         },
         blog: false,
