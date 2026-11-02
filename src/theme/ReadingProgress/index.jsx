@@ -1,13 +1,15 @@
 /**
  * @fileoverview 阅读进度绿环组件。
- * 悬浮于文档页右下角（回到顶部按钮上方），以圆环显示当前阅读进度（0~100%）。
+ * 悬浮于文档页右下角，以圆环显示当前阅读进度（0~100%）。
+ * 滚动到底部时，切换为「回到顶部」按钮（百分比淡出、上箭头淡入），点击平滑回顶。
  * 同时：
  * - 滚动时把进度比例写入 localStorage（节流保存）；
  * - 首次进入某篇文档时，恢复到上次保存的滚动位置。
  *
  * 流畅性：在 requestAnimationFrame 里通过 ref 直接更新 SVG 的 stroke-dashoffset
- * 与百分比文本，避免每次滚动都 setState 触发 React 重渲染；也不使用 CSS
- * transition（后者会让圆环始终滞后约 0.1s，且在部分 iOS 上不生效）。
+ * 与百分比文本，避免每次滚动都 setState 触发 React 重渲染；描边本身不用 CSS
+ * transition（那会让圆环始终滞后约 0.1s），只有「到底→回顶」切换时才对颜色/箭头
+ * 做短过渡。
  */
 
 import React, {useEffect, useRef} from 'react';
@@ -17,6 +19,7 @@ import styles from './styles.module.css';
 
 const RADIUS = 26; // 圆环半径（viewBox 64 内的 32 中心）
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+const DONE_THRESHOLD = 0.99; // 滚动比例超过该值视为「到底」，切换为回到顶部按钮
 
 /** 读取当前文档的滚动比例（0~1） */
 function getScrollRatio() {
@@ -33,8 +36,15 @@ function paintProgress(ring, label, ratio) {
   if (label) label.textContent = `${Math.round(ratio * 100)}%`;
 }
 
+/** 切换「到底 → 回到顶部按钮」状态（增删 CSS Module 的 done 类） */
+function toggleDone(container, done) {
+  if (!container) return;
+  container.classList.toggle(styles.done, done);
+}
+
 export default function ReadingProgress() {
   const {pathname} = useLocation();
+  const containerRef = useRef(null);
   const ringRef = useRef(null);
   const labelRef = useRef(null);
   const saveTimerRef = useRef(null);
@@ -45,8 +55,10 @@ export default function ReadingProgress() {
   useEffect(() => {
     const saved = loadProgress(pathname);
     lastRatioRef.current = saved ?? 0;
-    if (saved != null && saved > 0.005 && saved < 0.995) {
+    const willRestore = saved != null && saved > 0.005 && saved < 0.995;
+    if (willRestore) {
       paintProgress(ringRef.current, labelRef.current, saved);
+      toggleDone(containerRef.current, false);
       const frame = requestAnimationFrame(() => {
         const doc = document.scrollingElement || document.documentElement;
         const max = doc.scrollHeight - window.innerHeight;
@@ -57,6 +69,7 @@ export default function ReadingProgress() {
       return () => cancelAnimationFrame(frame);
     }
     paintProgress(ringRef.current, labelRef.current, 0);
+    toggleDone(containerRef.current, false);
   }, [pathname]);
 
   // 跟踪滚动：rAF 节流 + 直接写 DOM，并节流保存进度
@@ -66,6 +79,7 @@ export default function ReadingProgress() {
       const r = getScrollRatio();
       lastRatioRef.current = r;
       paintProgress(ringRef.current, labelRef.current, r);
+      toggleDone(containerRef.current, r >= DONE_THRESHOLD);
       // 节流保存，避免每次 scroll 都写 localStorage 造成卡顿
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(() => saveProgress(pathname, r), 300);
@@ -86,9 +100,31 @@ export default function ReadingProgress() {
     };
   }, [pathname]);
 
+  // 到底后点击回到顶部（未到底时点击无动作）
+  const scrollToTop = () => {
+    if (!containerRef.current || !containerRef.current.classList.contains(styles.done)) {
+      return;
+    }
+    const scroller = document.scrollingElement || document.documentElement;
+    if (scroller && typeof scroller.scrollTo === 'function') {
+      try {
+        scroller.scrollTo({top: 0, behavior: 'smooth'});
+        return;
+      } catch (error) {
+        // 某些环境不支持 options 参数，回退到瞬时跳转
+      }
+    }
+    window.scrollTo(0, 0);
+  };
+
   return (
-    <div className={styles.readingProgress} aria-hidden="true">
-      <svg viewBox="0 0 64 64" width="56" height="56">
+    <button
+      ref={containerRef}
+      type="button"
+      className={styles.readingProgress}
+      aria-label="回到顶部"
+      onClick={scrollToTop}>
+      <svg className={styles.ring} viewBox="0 0 64 64">
         <circle className={styles.track} cx="32" cy="32" r={RADIUS} />
         <circle
           ref={ringRef}
@@ -103,6 +139,18 @@ export default function ReadingProgress() {
       <span ref={labelRef} className={styles.label}>
         0%
       </span>
-    </div>
+      <svg
+        className={styles.arrow}
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round">
+        <path d="M12 19V5M5 12l7-7 7 7" />
+      </svg>
+    </button>
   );
 }

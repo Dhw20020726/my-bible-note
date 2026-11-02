@@ -1,17 +1,27 @@
 .readingProgress {
   position: fixed;
   right: 1.3rem;
-  bottom: 5.3rem;
+  bottom: 1.3rem;
   width: 56px;
   height: 56px;
   z-index: calc(var(--ifm-z-index-fixed) - 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.readingProgress svg {
+.readingProgress:focus-visible {
+  outline: 2px solid #16a34a;
+  outline-offset: 2px;
+}
+
+.readingProgress .ring {
   position: absolute;
   inset: 0;
   transform: rotate(-90deg);
@@ -30,6 +40,16 @@
 .progress {
   stroke: #16a34a;
   stroke-linecap: round;
+  transition: filter 0.25s ease;
+}
+
+.label,
+.arrow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.2s ease;
 }
 
 .label {
@@ -37,5 +57,26 @@
   font-weight: 600;
   color: #166534;
   line-height: 1;
-  z-index: 1;
+}
+
+.arrow {
+  color: #166534;
+  opacity: 0;
+}
+
+/* 滚动到底部后切换为「回到顶部」按钮：光标、发光、百分比淡出、箭头淡入 */
+.readingProgress.done {
+  cursor: pointer;
+}
+
+.readingProgress.done .progress {
+  filter: drop-shadow(0 0 5px rgba(22, 163, 74, 0.55));
+}
+
+.readingProgress.done .label {
+  opacity: 0;
+}
+
+.readingProgress.done .arrow {
+  opacity: 1;
 }
